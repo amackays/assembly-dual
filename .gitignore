@@ -1,0 +1,13 @@
+analysis-ec/
+logs/
+busco_downloads/
+*tmp*
+hifi_reads/
+.backup*
+.snakemake/
+scripts/k2_core_nt
+scripts/k2_core_nt_*.tar.gz
+scripts/*fcs-gx.sif
+scripts/remiallio_default_mitofinder.sif
+scripts/fcs-adaptor.sif
+*.out

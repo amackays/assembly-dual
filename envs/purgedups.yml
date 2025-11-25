@@ -1,0 +1,8 @@
+name: purgedups
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::purge_dups
+  - bioconda::minimap2

@@ -1,0 +1,11 @@
+name: nucmer
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - bioconda::mummer4
+  - bioconda::blast
+  - conda-forge::r-optparse 
+  - conda-forge::r-ggplot2
+  - conda-forge::r-plotly

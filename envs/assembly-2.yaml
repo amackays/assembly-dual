@@ -1,0 +1,13 @@
+name: assembly-2
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::kmer-jellyfish
+  - bioconda::genomescope2
+  - bioconda::samtools
+  - bioconda::hifiasm
+  - bioconda::hifiadapterfilt
+  - bioconda::meryl
+  - bioconda::libdeflate

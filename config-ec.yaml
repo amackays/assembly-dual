@@ -1,0 +1,114 @@
+# Ava Mackay-Smith, genome assembly pipeline 2025
+
+# NOTE: this pipeline is set up for PARTIALLY PHASED assemblies only. If you are looking for a reference/alternate assembly pipeline (i.e. hifiasm --primary), 
+# see my other directories.
+
+# CONFIG ##############################################
+
+# where do you want output files written to?
+workdir: "analysis-ec"
+
+# where are your hifi reads stored? make sure they have informative and short names!
+read_loc:
+  HEL_2: hifi_reads/HEL_2.bam.gz
+  HEL_1: hifi_reads/HEL_1.bam.gz
+  HEL_2: hifi_reads/HEL_2.bam.gz
+  HEL_4: hifi_reads/HEL_4.bam.gz
+  HEL_5: hifi_reads/HEL_5.bam.gz
+  HEL_6: hifi_reads/HEL_6.bam.gz
+  HEL_7: hifi_reads/HEL_7.bam.gz
+  HEL_8: hifi_reads/HEL_8.bam.gz
+  HEN_1: hifi_reads/HEN_1.bam.gz
+  HEN_5: hifi_reads/HEN_5.bam.gz
+  HEN_6: hifi_reads/HEN_6.bam.gz
+  HEN_7: hifi_reads/HEN_7.bam.gz
+  HEE_2: hifi_reads/HEE_2.bam.gz
+  HEE_3: hifi_reads/HEE_3.bam.gz
+  HEE_4: hifi_reads/HEE_4.bam.gz
+  HEE_5: hifi_reads/HEE_5.bam.gz
+
+# ASSEMBLY PARAMETERS ##################################
+
+assembly_type: "--dual-scaf"
+# set this to --dual-scaf when SV calling is important, and --primary when building reference genomes.
+#see hifiasm documentation for an explanation on these parameters.
+
+# MITOCHONDRIAL GENOME REFERENCE FILES #################
+
+mito_genbank: "scripts/NC_027516.1.gb"
+# for h. erato lativitta, nc_027516 is Heliconius clysonymus is closest available relative
+
+
+
+# DOCUMENTATION ########################################
+
+# genomescope2, jellyfish
+  # - https://github.com/schatzlab/genomescope
+  # - https://genome.umd.edu/jellyfish.html
+# hifiasm
+  # - https://github.com/chhylp123/hifiasm
+# gfastats, seqstat, meryl/merqury, BUSCO
+  # - https://github.com/vgl-hub/gfastats
+  # - https://genometools.org/tools.html << seqstat
+  # - https://github.com/marbl/meryl
+  # - https://github.com/marbl/merqury
+  # - https://gitlab.com/ezlab/busco
+# purge_dups
+  # - https://github.com/dfguan/purge_dups
+# inspector
+  # - https://github.com/Maggi-Chen/Inspector
+# ntLink
+  # - https://github.com/bcgsc/ntLink
+# mitoFinder
+  # - https://github.com/RemiAllio/MitoFinder?tab=readme-ov-file
+# Kraken2
+  # - https://github.com/DerrickWood/kraken2
+# ncbi-adaptor
+  # - https://github.com/ncbi/fcs
+# QUAST
+  # - https://github.com/ablab/quast
+
+
+# NOT IN USE: #########################################
+
+    # FCS-GX PIPELINE PARAMS ###############################
+
+    #tax_id: "246812"
+    #Heliconius erato lativitta: 246812
+    #Heliconius erato demophoon 1608923
+    #Heliconius erato etylus 246810
+    #Heliconius erato notabilis 246813
+    #Heliconius melpomene rosina 171916
+    #Heliconius melpomene ecuadorensis 248313
+    #Heliconius numata 33419
+
+#    rule fcs_toolkit:
+#    message: "screen the draft genome for adapter contamination with ncbi fcs-adaptor. NOTE that this rule can be modified to also use ncbi-gx to screen for foreign contaminants, although this should be taken >
+#    input:
+#	fasta="analysis/{sample}/corrected_{sample}/contig_corrected_inspectorFINAL.fa.k32.w100.z1000.ntLink.gap_fill.3rounds.fa",
+#        kraken="analysis/{sample}/decontam/kraken2/kraken_sequences.report"
+#    params:
+#        #ncbi_tax_id=config["tax_id"], #uncomment if using fcs_gx
+#        #path_to_gx_db="scripts/ncbi_fcs_gx", #uncomment if using fcs_gx
+#        path_to_contam_dir="analysis/{sample}/decontam/",
+#        adaptor_sif="scripts/fcs-adaptor.sif"
+#    output:
+#	cleaned_seq="ls analysis/{sample}/decontam/cleaned_sequences/contig_corrected_inspectorFINAL.fa.k32.w100.z1000.ntLink.gap_fill.3rounds.fa"
+#        #clean_fasta="analysis/{sample}/decontam_{sample}/{sample}_fcs-clean.fa", #uncomment if using fcs-gx
+#        #contaminants="analysis/{sample}/decontam_{sample}/contaminants.fa" #uncomment if using fcs-gx
+#    #threads: 8 #uncomment if using fcs_gx
+#    #resources: mem_mb=400000 #uncomment if using fcs_gx
+#    conda:
+#        "envs/contam.yaml"
+#    shell:
+#	"""
+#        # FCS-GX (conda hosted)        
+#        #run_gx.py --fasta analysis/testing/corrected_HEL_2/contig_corrected_inspectorFINAL.fa.k32.w100.z1000.ntLink.3rounds.fa --out-dir analysis/testing/decontam_HEL_2/ --gx-db scripts/ncbi_fcs_gx --tax-id 2>
+#
+#        # FCSadaptor (github/singularity hosted)
+#        scripts/run_fcsadaptor.sh --fasta-input {input.fasta} --output-dir {params.path_to_contam_dir} --euk --container-engine singularity --image {params.adaptor_sif}
+#
+#        # if using fcs-gx: clean up the output from FCS (change the action-report path to the correct report for cleaning)
+#        #        cat {input.fasta} | gx clean-genome --action-report {params.path_to_contam_dir}contig_corrected_inspectorFINAL.fa.k32.w100.z1000.ntLink.3rounds.246812.fcs_gx_report.txt \
+#        #            --output {output.clean_fasta} --contam-fasta-out {output.contaminants}
+#       """

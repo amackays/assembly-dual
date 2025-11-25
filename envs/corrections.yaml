@@ -1,0 +1,13 @@
+name: corrections
+channels:
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::ntlink
+  - bioconda::inspector
+  - pip
+  - pip:
+    - pysam
+    - igraph
+
+# igraph and pysam both may need to be pip installed prior to use.

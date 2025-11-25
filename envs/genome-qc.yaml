@@ -1,0 +1,15 @@
+name: genome-qc
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+  - agbiome
+dependencies:
+  - bioconda::gfastats
+  - bioconda::genomescope2
+  - bioconda::genometools-genometools
+  - bioconda::merqury
+  - agbiome::bbtools
+  - bioconda::bbmap
+  - bioconda::meryl
+  - bioconda::quast
