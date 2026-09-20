@@ -4,7 +4,9 @@ sampleid=$1 # HEL_2
 hap=$2 #hap1
 draft=$3 # analysis/HEL_2/hifiasm-draft_HEL_2/hap/HEL_2.p_utg.fa
 raw_reads=$4 # hifi_reads/HEL_2-reads.fastq
-workdir=$4
+workdir=$5
+
+#scripts/inspector.sh HEE_2 hap2 analysis-ec/HEE_2/purged-draft/hap2/HEE_2.hap2.p_ctg.purged.fa hifi_reads/HEE_2-reads.fastq analysis-ec
 
 mkdir -p ${workdir}/$sampleid/corrected/${hap}
 cp $draft ${workdir}/$sampleid/corrected/${hap}/${sampleid}.${hap}.contig_corrected_round0.fa
@@ -20,4 +22,4 @@ while [ $iteration -lt 3 ]; do
     echo "finished that round! on to round $iteration"
 done
 )
-mv ${workdir}/$sampleid/corrected/${hap}/${sampleid}.${hap}.contig_corrected_round2.fa ${workdir}/$sampleid/corrected/${sample}.${hap}.contig_corrected_inspectorFINAL.fa
+mv ${workdir}/$sampleid/corrected/${hap}/${sampleid}.${hap}.contig_corrected_round3.fa ${workdir}/$sampleid/corrected/${hap}/${sampleid}.${hap}.contig_corrected_inspectorFINAL.fa

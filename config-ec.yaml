@@ -38,7 +38,7 @@ assembly_type: "--dual-scaf"
 mito_genbank: "scripts/NC_027516.1.gb"
 # for h. erato lativitta, nc_027516 is Heliconius clysonymus is closest available relative
 
-
+reference: "iHelSar1.2_chroms.fa"
 
 # DOCUMENTATION ########################################
 

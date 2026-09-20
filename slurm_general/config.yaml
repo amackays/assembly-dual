@@ -15,8 +15,8 @@ default-resources:
    - runtime=2880
 #  - output=slurm-logs/{rule}/{rule}-{wildcards}-%j.out
 #  - error=slurm-logs/{rule}/{rule}-{wildcards}-.%j.err
-  - mail-user=apm58@duke.edu
-  - mail-type=END,FAIL
+   - mail_user=apm58@duke.edu
+   - mail_type=END,FAIL
 
 set-threads:
    - genomescope=8
@@ -34,10 +34,12 @@ set-resources:
    - draft_qc:mem_mb=400000
    - second_qc:mem_mb=400000
    - third_qc:mem_mb=400000
-   - purge_dups:mem_mb=400000
+   - purge_dups:mem_mb=450000
    - inspector:mem_mb=400000
    - ntlink:mem_mb=150000
    - kraken:mem_mb=400000
+   - plot_nucmer:mem_mb=50000
+   - quast:mem_mb=50000
 
 latency-wait: 300
 #restart-times: 2

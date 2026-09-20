@@ -13,7 +13,10 @@ genome_size=$(grep -e "Genome Haploid Length" ${topdir}/${sampleid}/raw_genomesc
 ############ genometools-genometools
 echo "Screening ${sampleid} assemblies with genometools"
 echo $(gt --version)
-gt seqstat -contigs yes -genome ${genome_size} ${draft} ${hap2} > ${draftdir}/stats/${sampleid}.seqstat
+echo "Parsing hap1..." ${draft} > ${draftdir}/stats/${sampleid}.seqstat
+gt seqstat -contigs yes -genome ${genome_size} ${draft} >> ${draftdir}/stats/${sampleid}.seqstat
+echo "Parsing hap2..." ${hap2} >> ${draftdir}/stats/${sampleid}.seqstat
+gt seqstat -contigs yes -genome ${genome_size} ${hap2} >> ${draftdir}/stats/${sampleid}.seqstat
 echo "finished processing ${sampleid}!"
 ############ busco
 echo "Assessing gene completeness for ${sampleid} using lepidopteran BUSCO for primary/alternate or unitig assembly..."

@@ -19,8 +19,8 @@ WORK_DIR = config["workdir"]
 
 rule all:
     input:
-        expand(WORK_DIR + "/{sample}/full-stat-report.txt", sample=samples.keys()),
-        expand(WORK_DIR + "/{sample}/{hap}-contam-report.txt", sample=samples.keys(), hap=["hap1", "hap2"]),
+        expand("logs/{sample}.done.log", sample=samples.keys()),
+        expand(WORK_DIR + "/{sample}/decontam/{hap}/kraken_sequences.report", sample=samples.keys(), hap=["hap1", "hap2"]),
         expand(WORK_DIR + "/{sample}/quast-{hap}/report.pdf", sample=samples.keys(), hap=["hap1", "hap2"]),
         expand(WORK_DIR + "/{sample}/nucmer/{sample}-{hap}-nucmer.png", sample=samples.keys(), hap=["hap1", "hap2"]),
 #        expand("logs/{sample}.done.log", sample=samples.keys())
@@ -181,50 +181,12 @@ rule ntlink:
         ntLink_rounds run_rounds_gaps clean rounds=3 target={wildcards.sample}.{wildcards.hap}.contig_corrected_inspectorFINAL.fa reads={wildcards.sample}-reads.fastq
         """
 
-rule fcs_toolkit:
-    message: "screen the draft genome for adapter contamination with ncbi fcs-adaptor. NOTE that this rule can be modified to also use ncbi-gx to screen for foreign contaminants, although this should be taken care of with Kraken2 in the previous step."
-    input:
-        fasta=WORK_DIR + "/{sample}/corrected/{hap}/{sample}.{hap}.contig_corrected_inspectorFINAL.fa"
-    params:
-        path_to_contam_dir=WORK_DIR + "/{sample}/decontam/{hap}",
-        adaptor_sif="scripts/fcs-adaptor.sif"
-    output:
-        cleaned_seq=WORK_DIR + "/{sample}/decontam/{hap}/fcs_adaptor.log"
-    conda:
-        "envs/contam.yaml"
-    log: "logs/fcs_toolkit.{sample}.{hap}.log"
-    shell:
-        """
-        cp {input.fasta} {WORK_DIR}/{wildcards.sample}/decontam/{wildcards.hap}/{wildcards.sample}.{wildcards.hap}.ntLink.fa
-        scripts/run_fcsadaptor.sh --fasta-input {WORK_DIR}/{wildcards.sample}/decontam/{wildcards.hap}/{wildcards.sample}.{wildcards.hap}.ntLink.fa --output-dir {params.path_to_contam_dir} --euk --container-engine singularity --image {params.adaptor_sif}
-        """
-
-rule mito:
-    message: "search for the mitochondrial genome in the {input.draft} assembly using Heliconius clysonymus as the closest relative complete mitochondrial genome, using MitoFinder and MitFi."
-    input:
-        draft=WORK_DIR + "/{sample}/corrected/{hap}/{sample}.{hap}.contig_corrected_inspectorFINAL.fa.k32.w100.z1000.ntLink.gap_fill.3rounds.fa",
-        mito_genbank=config["mito_genbank"]
-    output:
-        mito_assembled=directory(WORK_DIR + "/{sample}/mito/{hap}/{sample}{hap}_MitoFinder_mitfi_Final_Results/"),
-        mito_list=WORK_DIR + "/{sample}/mito/{hap}/mito-candidates.txt"
-    params:
-        singularity_mitofinder="scripts/remiallio_default_mitofinder.sif"
-    log: "logs/mito.{sample}.{hap}.log"
-    shell:
-        """
-        mkdir -p {WORK_DIR}/{wildcards.sample}/mito/{wildcards.hap}
-        singularity run {params.singularity_mitofinder} -j {wildcards.sample}{wildcards.hap} -a {input.draft} -r {input.mito_genbank} -o 5 -p 8 -m 8 --rename-contig yes 
-        cp -r {wildcards.sample}{wildcards.hap}/. {WORK_DIR}/{wildcards.sample}/mito/{wildcards.hap}
-        echo "Mito Candidates" >> {output.mito_list}
-        ls {output.mito_assembled} >> {output.mito_list}
-        """
-
 rule kraken:
     message: "check corrected and gap-filled assembly for contaminants using Kraken2."
     input:
         draft=WORK_DIR + "/{sample}/corrected/{hap}/{sample}.{hap}.contig_corrected_inspectorFINAL.fa.k32.w100.z1000.ntLink.gap_fill.3rounds.fa",
         reads="hifi_reads/{sample}-reads.fastq",
-        cleaned_seq=WORK_DIR + "/{sample}/decontam/{hap}/fcs_adaptor.log"
+        #cleaned_seq=WORK_DIR + "/{sample}/decontam/{hap}/fcs_adaptor.log"
     output:
         kraken=WORK_DIR + "/{sample}/decontam/{hap}/kraken_sequences.report"
     conda:
@@ -281,30 +243,10 @@ rule compile_stats:
         cat {input.genomescope} {input.draft} {input.purged} {input.decontam} > {output.stats_report}
         """
 
-rule compile_contams:
-    message: "Aggregate mitochondrial and contaminant information from each draft assembly."
-    input:
-        kraken=WORK_DIR + "/{sample}/decontam/{hap}/kraken_sequences.report",
-        mito_list=WORK_DIR + "/{sample}/mito/{hap}/mito-candidates.txt",
-        cleaned_seq=WORK_DIR + "/{sample}/decontam/{hap}/fcs_adaptor.log"
-    output:
-        contam_report= WORK_DIR + "/{sample}/{hap}-contam-report.txt",
-        draft=WORK_DIR + "/{sample}/decontam/{sample}.bp.{hap}.p_ctg.fa"
-    shell:
-        """
-        touch {output.contam_report}
-        cat {input.kraken} {input.cleaned_seq} >> {output.contam_report} 2>/dev/null
-        if ls analysis/{wildcards.sample}/mito/{wildcards.hap}/{wildcards.sample}{wildcards.hap}_MitoFinder_mitfi_Final_Results/*.infos ; then
-            find analysis/{wildcards.sample}/mito/{wildcards.hap}/{wildcards.sample}{wildcards.hap}_MitoFinder_mitfi_Final_Results/ -maxdepth 1 -type f -name "*infos" -exec grep -w "Initial contig name" {{}} \; >> {output.contam_report}
-        else
-            echo "no mitochondrial contigs identified" >> {output.contam_report}
-        fi
-        """
-
 rule quast:
     message: "run QUAST on the final assembly relative to iHelSar1.2, or other reference genome"
     input:
-        draft=WORK_DIR + "/{sample}/decontam/{sample}.bp.{hap}.p_ctg.fa",
+        draft=WORK_DIR + "/{sample}/corrected/{hap}/{sample}.{hap}.contig_corrected_inspectorFINAL.fa.k32.w100.z1000.ntLink.gap_fill.3rounds.fa",
         reference=config["reference"]
     output:
         report= WORK_DIR + "/{sample}/quast-{hap}/report.pdf",
@@ -319,7 +261,7 @@ rule quast:
 rule plot_nucmer:
     message: "generate nucmer plot of draft genome aligned to reference or iHelSar1.2."
     input:
-        draft=WORK_DIR + "/{sample}/decontam/{sample}.bp.{hap}.p_ctg.fa",
+        draft=WORK_DIR + "/{sample}/corrected/{hap}/{sample}.{hap}.contig_corrected_inspectorFINAL.fa.k32.w100.z1000.ntLink.gap_fill.3rounds.fa",
         reference=config["reference"]
     output:
         out= WORK_DIR + "/{sample}/nucmer/{sample}-{hap}-nucmer.png"
@@ -331,13 +273,30 @@ rule plot_nucmer:
         """
         mkdir -p {WORK_DIR}/{wildcards.sample}/nucmer
         samtools faidx {input.reference}
-        cp {input.reference}* {WORK_DIR}/{wildcards.sample}/nucmer && cd {WORK_DIR}/{wildcards.sample}/nucmer
-        nucmer -l 100 -p {wildcards.sample}-{wildcards.hap} ../decontam/{wildcards.sample}.bp.{wildcards.hap}.p_ctg.fa {input.reference}
+        cp {input.reference}* {input.draft} {WORK_DIR}/{wildcards.sample}/nucmer && cd {WORK_DIR}/{wildcards.sample}/nucmer
+        nucmer -l 100 -p {wildcards.sample}-{wildcards.hap} {wildcards.sample}.{wildcards.hap}.contig_corrected_inspectorFINAL.fa.k32.w100.z1000.ntLink.gap_fill.3rounds.fa {input.reference}
         delta-filter -l 10000 -q -r {wildcards.sample}-{wildcards.hap}.delta > {wildcards.sample}-{wildcards.hap}.filt.delta
         show-coords -c {wildcards.sample}-{wildcards.hap}.filt.delta > {wildcards.sample}-{wildcards.hap}.coords
         Rscript ../../../{params.script} -i {wildcards.sample}-{wildcards.hap}.coords -o {wildcards.sample}-{wildcards.hap}-nucmer -s -t -m 500 -q 10000 -l -x
         """
 
+rule cleanup:
+    message: "clean up extra files into intermediate directory."
+    input:
+        WORK_DIR + "/{sample}/full-stat-report.txt"
+    output:
+        "logs/{sample}.done.log"
+    shell:
+        """
+        if [ -d "{wildcards.sample}*" ]; then
+            mkdir -p intermediate_files/
+            mv {wildcards.sample}*/ busco* intermediate_files
+            mv *.log intermediate_files
+            touch logs/{wildcards.sample}.done.log
+        else
+            touch logs/{wildcards.sample}.done.log
+        fi
+        """
 #rule cleanup:
 #    message: "clean up extra files into intermediate directory."
 #    input:
@@ -371,3 +330,4 @@ rule plot_nucmer:
 #genomescope of old genome?
 
 # print done
+

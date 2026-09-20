@@ -11,3 +11,8 @@ scripts/*fcs-gx.sif
 scripts/remiallio_default_mitofinder.sif
 scripts/fcs-adaptor.sif
 *.out
+iHelSar1.2*
+sex_chrom/
+HEN_6hap2*
+intermediate_files/
+

@@ -1,0 +1,7 @@
+name: mummer
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - bioconda::mummer4

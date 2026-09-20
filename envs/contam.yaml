@@ -6,4 +6,4 @@ channels:
 dependencies:
   - bioconda::ncbi-fcs-gx
   - bioconda::kraken2
-  - bioconda::blast
+  - bioconda::blast=2.17.0

@@ -1,11 +1,13 @@
 name: nucmer
 channels:
-  - bioconda
   - conda-forge
+  - bioconda
   - defaults
 dependencies:
   - bioconda::mummer4
-  - bioconda::blast
-  - conda-forge::r-optparse 
   - conda-forge::r-ggplot2
+  - conda-forge::r-optparse
   - conda-forge::r-plotly
+  - bioconda::blast
+  - samtools
+prefix: /hpc/group/wraylab/apm58/miniconda3/envs/nucmer
