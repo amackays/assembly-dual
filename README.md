@@ -1,6 +1,6 @@
 Ava Mackay-Smith, genome assembly pipeline 2025
 
-NOTE: this pipeline is set up for PARTIALLY PHASED assemblies only. If you are looking for a reference/alternate assembly pipeline (i.e. hifiasm --primary), see my other directories.
+NOTE: this pipeline is set up for PARTIALLY PHASED assemblies only. If you are looking for a reference/alternate assembly pipeline (i.e. hifiasm --primary), see the [other repo] (https://github.com/amackays/assembly-pri), which will purge and validate only the primary assembly of a Hifiasm assembly run.
 
 # Setting up this Pipeline
 
@@ -46,6 +46,10 @@ If you do not use SLURM, make sure to request conda env usage: `snakemake --use-
 
 If you are using a computing cluster, make sure that your python install location is in your active conda env or the env of the rule in question, rather than installed through your cluster's Anaconda install.
 This fixed many of my problems.
+
+Other known bugs: if a job fails or the snakemake run is cut short (a user aborts a run, etc). then sometimes the conda environments built from the manifests in envs/ will fail with an error that Snakemake can't find an installed tool in that env. This can be solved by removing the built env and reinstalling it/forcing a reinstall.
+
+Some of the late-stage tools are buggy (e.g. MitoFinder and NCBI-FCS). MitoFinder should be configured that it continues the run even if no mitochondrial contig is identified, but I haven't extensively validated this, partially because the MitoHiFi tool would be better for this job - I've left MitoFinder in this script to make it follow the workflow of the other [reference genome assembly pipeline] (https://github.com/amackays/assembly-pri). If NCBI-FCS needs to be skipped, there's a separate Snakemake file in this directory called Snakefile_nofcs.
 
 Feel free to modify the slurm_general config to work for your genomes (e.g. runtime, restart-times, etc).
 
